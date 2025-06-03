@@ -74,11 +74,11 @@ async def op(_, m :Message):
     keyboard = InlineKeyboardMarkup(
         [[
             InlineKeyboardButton("🗯 Channel", url="https://t.me/tmtfiles"),
-            InlineKeyboardButton("💬 Support", url="https://t.me/+SvDPfZF-JhdhN2E9")
+            InlineKeyboardButton("𝗠𝗼𝘃𝗶𝗲  𝗥𝗲𝗾𝘂𝗲𝘀𝘁", url="https://t.me/+wUD7nEvlpfk4Yzg1")
         ]]
     )
     add_user(m.from_user.id)
-    await m.reply_photo("https://graph.org/file/abb6d4d2c21112c8a6e3c-9a3b89cc6a258e4f69.jpg", caption="**🦊 Hello {}!\nI'm an auto approve [Admin Join Requests]({}) Bot.\nI can approve users in Groups/Channels.Add me to your chat and promote me to admin with add members permission.\n\n__Powered By :  @tmtfiles __**".format(m.from_user.mention, "https://t.me/telegram/153"), reply_markup=keyboard)
+    await m.reply_photo("https://graph.org/file/de5c7af062bca04676392-260768d152b2e14a7a.jpg", caption="**🦊 Hello {}!\nI'm an auto approve [Admin Join Requests]({}) Bot.\nI can approve users in Groups/Channels.Add me to your chat and promote me to admin with add members permission.\n\n__Powered By :  @tmtfiles __**".format(m.from_user.mention, "https://t.me/telegram/153"), reply_markup=keyboard)
     
 
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ callback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -93,7 +93,7 @@ async def chk(_, m :Message, cb : CallbackQuery):
     keyboard = InlineKeyboardMarkup(
         [[
             InlineKeyboardButton("🗯 Channel", url="https://t.me/tmtfiles"),
-            InlineKeyboardButton("💬 Support", url="https://t.me/+SvDPfZF-JhdhN2E9")
+            InlineKeyboardButton("𝗠𝗼𝘃𝗶𝗲  𝗥𝗲𝗾𝘂𝗲𝘀𝘁", url="https://t.me/+wUD7nEvlpfk4Yzg1")
         ]]
     )
     add_user(m.from_user.id)
