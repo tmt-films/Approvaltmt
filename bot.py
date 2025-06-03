@@ -35,7 +35,7 @@ async def approve(_, m: Message):
         InlineKeyboardButton("Button 2", url="https://t.me/Hybrid_approve_bot")
     ],
     [
-        InlineKeyboardButton("click here to approve", url="https://t.me/Hybrid_approve_bot?start=start")
+        InlineKeyboardButton("click here to approve", url="https://t.me/Sofiya_tmtbot?start=start")
     ]
 ])
 
