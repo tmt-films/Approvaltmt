@@ -10,7 +10,7 @@ class Config:
     API_HASH = getenv("API_HASH", "")
     BOT_TOKEN = getenv("BOT_TOKEN", "")
     # Your Force Subscribe Channel Id Below 
-    CHID = int(getenv("CHID", "")) # Make Bot Admin In This Channel
+    CHID = int(getenv("CHID", "-1002227186664")) # Make Bot Admin In This Channel
     # Admin Or Owner Id Below
     SUDO = list(map(int, getenv("SUDO", "").split()))
     MONGO_URI = getenv("MONGO_URI", "")
