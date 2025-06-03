@@ -19,19 +19,37 @@ app = Client(
 
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Main process ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 @app.on_chat_join_request(filters.group | filters.channel)
-async def approve(_, m : Message):
+async def approve(_, m: Message):
     op = m.chat
     kk = m.from_user
     try:
         add_group(m.chat.id)
         await app.approve_chat_join_request(op.id, kk.id)
-        await app.send_message(kk.id, "**Hello {}!\nWelcome To {}\n\n__Powerd By : @VJ_Botz __**".format(m.from_user.mention, m.chat.title))
+        
+        keyboard = InlineKeyboardMarkup([
+    [
+        InlineKeyboardButton("Button 1", callback_data="button1.com"),
+        InlineKeyboardButton("Button 2", callback_data="button2.com")
+    ],
+    [
+        InlineKeyboardButton("click here to approve", url="https://t.me/Hybrid_approve_bot?start=start")
+    ]
+])
+
+        await app.send_message(
+            kk.id, 
+            "**Hello {}!\nWelcome To {}\n **".format(m.from_user.mention, m.chat.title),
+            reply_markup=keyboard
+        )
+        
         add_user(kk.id)
     except errors.PeerIdInvalid as e:
-        print("user isn't start bot(means group)")
+        print("User hasn't started the bot (means group)")
     except Exception as err:
-        print(str(err))    
+        print(str(err))
  
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Start ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -51,22 +69,22 @@ async def op(_, m :Message):
                 InlineKeyboardButton("🍀 Check Again 🍀", callback_data="chk")
             ]]
         ) 
-        await m.reply_text("**⚠️Access Denied!⚠️\n\nPlease Join My Update Channel To Use Me.If You Joined The Channel Then Click On Check Again Button To Confirm.**", reply_markup=key)
+        await m.reply_text("**⚠️Access Denied! \n\nPlease Join My Update Channel To Use Me.If You Joined The Channel Then Click On Check Again Button To Confirm.**", reply_markup=key)
         return 
     keyboard = InlineKeyboardMarkup(
         [[
-            InlineKeyboardButton("🗯 Channel", url="https://t.me/vj_botz"),
-            InlineKeyboardButton("💬 Support", url="https://t.me/vj_bot_disscussion")
+            InlineKeyboardButton("🗯 Channel", url="https://t.me/THEHYBRIDS"),
+            InlineKeyboardButton("💬 Support", url="https://t.me/+SvDPfZF-JhdhN2E9")
         ]]
     )
     add_user(m.from_user.id)
-    await m.reply_photo("https://graph.org/file/d57d6f83abb6b8d0efb02.jpg", caption="**🦊 Hello {}!\nI'm an auto approve [Admin Join Requests]({}) Bot.\nI can approve users in Groups/Channels.Add me to your chat and promote me to admin with add members permission.\n\n__Powered By : @VJ_Botz __**".format(m.from_user.mention, "https://t.me/telegram/153"), reply_markup=keyboard)
+    await m.reply_photo("https://graph.org/file/abb6d4d2c21112c8a6e3c-9a3b89cc6a258e4f69.jpg", caption="**🦊 Hello {}!\nI'm an auto approve [Admin Join Requests]({}) Bot.\nI can approve users in Groups/Channels.Add me to your chat and promote me to admin with add members permission.\n\n__Powered By :  @THEHYBRIDS __**".format(m.from_user.mention, "https://t.me/telegram/153"), reply_markup=keyboard)
     
 
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ callback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 @app.on_callback_query(filters.regex("chk"))
-async def chk(_, cb : CallbackQuery):
+async def chk(_, m :Message, cb : CallbackQuery):
     try:
         await app.get_chat_member(cfg.CHID, cb.from_user.id)
     except:
@@ -74,12 +92,12 @@ async def chk(_, cb : CallbackQuery):
         return 
     keyboard = InlineKeyboardMarkup(
         [[
-            InlineKeyboardButton("🗯 Channel", url="https://t.me/vj_botz"),
-            InlineKeyboardButton("💬 Support", url="https://t.me/vj_bot_disscussion")
+            InlineKeyboardButton("🗯 Channel", url="https://t.me/THEHYBRIDS"),
+            InlineKeyboardButton("💬 Support", url="https://t.me/+SvDPfZF-JhdhN2E9")
         ]]
     )
     add_user(m.from_user.id)
-    await cb.edit_text(text="**🦊 Hello {}!\nI'm an auto approve [Admin Join Requests]({}) Bot.\nI can approve users in Groups/Channels.Add me to your chat and promote me to admin with add members permission.\n\n__Powered By : @VJ_Botz __**".format(cb.from_user.mention, "https://t.me/telegram/153"), reply_markup=keyboard)
+    await cb.edit_text(text="**Hello {}!\nI'm an auto approve [Admin Join Requests]({}) Bot.\nI can approve users in Groups/Channels.Add me to your chat and promote me to admin with add members permission.\n\n__Powered By : @THEHYBRIDS __**".format(cb.from_user.mention, "https://t.me/telegram/153"), reply_markup=keyboard)
     
 
 #━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ info ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
