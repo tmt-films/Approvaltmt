@@ -31,8 +31,8 @@ async def approve(_, m: Message):
         
         keyboard = InlineKeyboardMarkup([
     [
-        InlineKeyboardButton("Button 1", url="https://t.me/Hybrid_approve_bot"),
-        InlineKeyboardButton("Button 2", url="https://t.me/Hybrid_approve_bot")
+        InlineKeyboardButton("𝗡𝗮𝘃𝗮𝗿𝗲𝘀𝗮", url="https://t.me/+KUHDIO9bOTNjZDk1"),
+        InlineKeyboardButton("𝗕𝗼𝗼𝗺𝗲𝘅", url="https://t.me/+WhVDuMbBIgYwMzQ1")
     ],
     [
         InlineKeyboardButton("click here to approve", url="https://t.me/Sofiya_tmtbot?start=start")
