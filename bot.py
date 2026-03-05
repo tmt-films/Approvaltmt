@@ -33,7 +33,7 @@ app = Client(
 # ── Reusable keyboards ────────────────────────────────────────────────────────
 MAIN_KEYBOARD = InlineKeyboardMarkup(
     [[
-        InlineKeyboardButton("🗯 Channel", url="https://t.me/vj_botz"),
+        InlineKeyboardButton("🗯 കേരളദേശം", url="https://t.me/Keraladhesham"),
         InlineKeyboardButton("💬 Support", url="https://t.me/vj_bot_disscussion"),
     ]]
 )
@@ -42,10 +42,10 @@ START_CAPTION = (
     "**🦊 Hello {mention}!\n"
     "I'm an auto approve [Admin Join Requests](https://t.me/telegram/153) Bot.\n"
     "I can approve users in Groups/Channels. Add me to your chat and promote me to admin "
-    "with add members permission.\n\n__Powered By : @VJ_Botz __**"
+    "with add members permission.\n\n__Powered By : @Keraladhesham __**"
 )
 
-START_PHOTO = "https://graph.org/file/d57d6f83abb6b8d0efb02.jpg"
+START_PHOTO = "https://files.catbox.moe/u5gz71.jpg"
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 async def is_subscribed(user_id: int) -> bool:
@@ -146,10 +146,10 @@ async def approve(_, m: Message):
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("🔸 Share To Approve 🔸", url=share_url)],
             [
-                InlineKeyboardButton("𝗡𝗮𝘃𝗮𝗿𝗲𝘀𝗮", url="https://t.me/+KUHDIO9bOTNjZDk1"),
-                InlineKeyboardButton("𝗕𝗼𝗼𝗺𝗲𝘅 Channel", url="https://t.me/+WhVDuMbBIgYwMzQ1"),
+                InlineKeyboardButton("𝐔𝐕 𝐌𝐎𝐃𝐒", url="https://t.me/+MtvBqpmAEDcwNGJh"),
+                InlineKeyboardButton("𝐓𝐇𝐄 𝐆𝐀𝐓𝐄 🏛", url="https://t.me/+pl_nYCS17hg0Yjc1"),
             ],
-            [InlineKeyboardButton("𝗕𝗼𝗼𝗺𝗲𝘅 Bot", url="https://t.me/Sofiya_tmtbot?start=start")],
+            [InlineKeyboardButton("𝐂𝐇𝐀𝐓 𝐋𝐈𝐒𝐓 📋", url="https://t.me/autoapprovalprobot?start=start")],
         ])
 
         await app.send_message(
