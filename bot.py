@@ -1,181 +1,254 @@
-# Don't Remove Credit @VJ_Botz
-# Subscribe YouTube Channel For Amazing Bot @Tech_VJ
-# Ask Doubt on telegram @KingVJ01
+import asyncio
+import logging
+from urllib.parse import quote
 
-from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
-from pyrogram import filters, Client, errors, enums
-from pyrogram.errors import UserNotParticipant
-from pyrogram.errors.exceptions.flood_420 import FloodWait
-from database import add_user, add_group, all_users, all_groups, users, remove_user
+from pyrogram import Client, errors, filters
+from pyrogram.errors import FloodWait
+from pyrogram.types import (
+    CallbackQuery,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Message,
+)
+
 from configs import cfg
-import random, asyncio
+from database import add_group, add_user, all_groups, all_users, remove_user, users
 
+# ── Logging ──────────────────────────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+log = logging.getLogger(__name__)
+
+# ── Client ───────────────────────────────────────────────────────────────────
 app = Client(
     "approver",
     api_id=cfg.API_ID,
     api_hash=cfg.API_HASH,
-    bot_token=cfg.BOT_TOKEN
+    bot_token=cfg.BOT_TOKEN,
 )
 
-#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Main process ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# ── Reusable keyboards ────────────────────────────────────────────────────────
+MAIN_KEYBOARD = InlineKeyboardMarkup(
+    [[
+        InlineKeyboardButton("🗯 Channel", url="https://t.me/vj_botz"),
+        InlineKeyboardButton("💬 Support", url="https://t.me/vj_bot_disscussion"),
+    ]]
+)
 
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+START_CAPTION = (
+    "**🦊 Hello {mention}!\n"
+    "I'm an auto approve [Admin Join Requests](https://t.me/telegram/153) Bot.\n"
+    "I can approve users in Groups/Channels. Add me to your chat and promote me to admin "
+    "with add members permission.\n\n__Powered By : @VJ_Botz __**"
+)
 
+START_PHOTO = "https://graph.org/file/d57d6f83abb6b8d0efb02.jpg"
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+async def is_subscribed(user_id: int) -> bool:
+    """Return True if user is a member of the required channel."""
+    try:
+        await app.get_chat_member(cfg.CHID, user_id)
+        return True
+    except Exception:
+        return False
+
+
+async def get_force_join_keyboard() -> InlineKeyboardMarkup | None:
+    """Build the force-join keyboard, or return None if invite link can't be created."""
+    try:
+        link = await app.create_chat_invite_link(int(cfg.CHID))
+        return InlineKeyboardMarkup([[
+            InlineKeyboardButton("🍿 Join Update Channel 🍿", url=link.invite_link),
+            InlineKeyboardButton("🍀 Check Again 🍀", callback_data="chk"),
+        ]])
+    except Exception:
+        return None
+
+
+async def broadcast_message(m: Message, forward: bool = False) -> tuple[int, int, int, int]:
+    """
+    Broadcast a message to all users.
+
+    Args:
+        m: The /bcast or /fcast command message (reply_to_message is the content).
+        forward: If True, forward instead of copy.
+
+    Returns:
+        (success, failed, deactivated, blocked) counts.
+    """
+    success = failed = deactivated = blocked = 0
+    content = m.reply_to_message
+
+    for doc in users.find({}, {"user_id": 1}):
+        uid = int(doc["user_id"])
+        try:
+            if forward:
+                await content.forward(uid)
+            else:
+                await content.copy(uid)
+            success += 1
+        except FloodWait as e:
+            await asyncio.sleep(e.value + 1)
+            try:
+                if forward:
+                    await content.forward(uid)
+                else:
+                    await content.copy(uid)
+                success += 1
+            except Exception:
+                failed += 1
+        except errors.InputUserDeactivated:
+            deactivated += 1
+            remove_user(uid)
+        except errors.UserIsBlocked:
+            blocked += 1
+        except Exception as e:
+            log.warning("Broadcast error for %s: %s", uid, e)
+            failed += 1
+
+    return success, failed, deactivated, blocked
+
+
+# ── Handlers ──────────────────────────────────────────────────────────────────
+
+# ── Auto-approve join requests ────────────────────────────────────────────────
 @app.on_chat_join_request(filters.group | filters.channel)
 async def approve(_, m: Message):
-    op = m.chat
-    kk = m.from_user
+    chat = m.chat
+    user = m.from_user
+
     try:
-        add_group(m.chat.id)
-        await app.approve_chat_join_request(op.id, kk.id)
-        
+        add_group(chat.id)
+        await app.approve_chat_join_request(chat.id, user.id)
+        add_user(user.id)
+    except Exception as e:
+        log.error("Failed to approve %s in %s: %s", user.id, chat.id, e)
+        return
+
+    # Build welcome DM
+    try:
+        chat_info = await app.get_chat(chat.id)
+        invite = await app.create_chat_invite_link(chat.id)
+
+        share_text = f"Join {chat_info.title}"
+        if chat_info.description:
+            share_text += f"\n\n{chat_info.description}"
+
+        share_url = (
+            f"https://t.me/share/url?"
+            f"url={quote(invite.invite_link)}&text={quote(share_text)}"
+        )
+
         keyboard = InlineKeyboardMarkup([
-    [
-        InlineKeyboardButton("𝗡𝗮𝘃𝗮𝗿𝗲𝘀𝗮", url="https://t.me/+KUHDIO9bOTNjZDk1"),
-        InlineKeyboardButton("𝗕𝗼𝗼𝗺𝗲𝘅", url="https://t.me/+WhVDuMbBIgYwMzQ1")
-    ],
-    [
-        InlineKeyboardButton("click here to approve", url="https://t.me/Sofiya_tmtbot?start=start")
-    ]
-])
+            [InlineKeyboardButton("🔸 Share To Approve 🔸", url=share_url)],
+            [
+                InlineKeyboardButton("𝗡𝗮𝘃𝗮𝗿𝗲𝘀𝗮", url="https://t.me/+KUHDIO9bOTNjZDk1"),
+                InlineKeyboardButton("𝗕𝗼𝗼𝗺𝗲𝘅 Channel", url="https://t.me/+WhVDuMbBIgYwMzQ1"),
+            ],
+            [InlineKeyboardButton("𝗕𝗼𝗼𝗺𝗲𝘅 Bot", url="https://t.me/Sofiya_tmtbot?start=start")],
+        ])
 
         await app.send_message(
-            kk.id, 
-            "**Hello {}!\nWelcome To {}\n **".format(m.from_user.mention, m.chat.title),
-            reply_markup=keyboard
+            user.id,
+            f"**✅ You have been accepted to {chat.title}!**\n\n"
+            f"Share this group with your friends to help us grow 🚀",
+            reply_markup=keyboard,
         )
-        
-        add_user(kk.id)
-    except errors.PeerIdInvalid as e:
-        print("User hasn't started the bot (means group)")
-    except Exception as err:
-        print(str(err))
- 
-#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Start ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    except errors.PeerIdInvalid:
+        log.info("User %s hasn't started the bot; skipping DM.", user.id)
+    except Exception as e:
+        log.warning("DM error for %s: %s", user.id, e)
 
+
+# ── /start ────────────────────────────────────────────────────────────────────
 @app.on_message(filters.private & filters.command("start"))
-async def op(_, m :Message):
-    try:
-        await app.get_chat_member(cfg.CHID, m.from_user.id)
-    except:
-        try:
-            invite_link = await app.create_chat_invite_link(int(cfg.CHID))
-        except:
+async def start(_, m: Message):
+    if not await is_subscribed(m.from_user.id):
+        keyboard = await get_force_join_keyboard()
+        if keyboard is None:
             await m.reply("**Make Sure I Am Admin In Your Channel**")
-            return 
-        key = InlineKeyboardMarkup(
-            [[
-                InlineKeyboardButton("🍿 Join Update Channel 🍿", url=invite_link.invite_link),
-                InlineKeyboardButton("🍀 Check Again 🍀", callback_data="chk")
-            ]]
-        ) 
-        await m.reply_text("**⚠️Access Denied! \n\nPlease Join My Update Channel To Use Me.If You Joined The Channel Then Click On Check Again Button To Confirm.**", reply_markup=key)
-        return 
-    keyboard = InlineKeyboardMarkup(
-        [[
-            InlineKeyboardButton("🗯 Channel", url="https://t.me/tmtfiles"),
-            InlineKeyboardButton("𝗠𝗼𝘃𝗶𝗲  𝗥𝗲𝗾𝘂𝗲𝘀𝘁", url="https://t.me/+wUD7nEvlpfk4Yzg1")
-        ]]
-    )
+            return
+        await m.reply_text(
+            "**⚠️ Access Denied! ⚠️\n\n"
+            "Please join my Update Channel to use me. "
+            "Once joined, tap **Check Again** to confirm.**",
+            reply_markup=keyboard,
+        )
+        return
+
     add_user(m.from_user.id)
-    await m.reply_photo("https://graph.org/file/de5c7af062bca04676392-260768d152b2e14a7a.jpg", caption="**🦊 Hello {}!\nI'm an auto approve [Admin Join Requests]({}) Bot.\nI can approve users in Groups/Channels.Add me to your chat and promote me to admin with add members permission.\n\n__Powered By :  @tmtfiles __**".format(m.from_user.mention, "https://t.me/telegram/153"), reply_markup=keyboard)
-    
-
-#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ callback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-@app.on_callback_query(filters.regex("chk"))
-async def chk(_, m :Message, cb : CallbackQuery):
-    try:
-        await app.get_chat_member(cfg.CHID, cb.from_user.id)
-    except:
-        await cb.answer("🙅‍♂️ You are not joined my channel first join channel then check again. 🙅‍♂️", show_alert=True)
-        return 
-    keyboard = InlineKeyboardMarkup(
-        [[
-            InlineKeyboardButton("🗯 Channel", url="https://t.me/tmtfiles"),
-            InlineKeyboardButton("𝗠𝗼𝘃𝗶𝗲  𝗥𝗲𝗾𝘂𝗲𝘀𝘁", url="https://t.me/+wUD7nEvlpfk4Yzg1")
-        ]]
+    await m.reply_photo(
+        START_PHOTO,
+        caption=START_CAPTION.format(mention=m.from_user.mention),
+        reply_markup=MAIN_KEYBOARD,
     )
-    add_user(m.from_user.id)
-    await cb.edit_text(text="**Hello {}!\nI'm an auto approve [Admin Join Requests]({}) Bot.\nI can approve users in Groups/Channels.Add me to your chat and promote me to admin with add members permission.\n\n__Powered By : @tmtfiles __**".format(cb.from_user.mention, "https://t.me/telegram/153"), reply_markup=keyboard)
-    
 
-#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ info ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+# ── Check-subscription callback ───────────────────────────────────────────────
+@app.on_callback_query(filters.regex("^chk$"))
+async def chk(_, cb: CallbackQuery):
+    if not await is_subscribed(cb.from_user.id):
+        await cb.answer(
+            "🙅 You haven't joined the channel yet. Join first, then tap Check Again.",
+            show_alert=True,
+        )
+        return
+
+    add_user(cb.from_user.id)
+    await cb.edit_message_text(
+        text=START_CAPTION.format(mention=cb.from_user.mention),
+        reply_markup=MAIN_KEYBOARD,
+    )
+
+
+# ── /users (sudo only) ────────────────────────────────────────────────────────
 @app.on_message(filters.command("users") & filters.user(cfg.SUDO))
-async def dbtool(_, m : Message):
-    xx = all_users()
-    x = all_groups()
-    tot = int(xx + x)
-    await m.reply_text(text=f"""
-🍀 Chats Stats 🍀
-🙋‍♂️ Users : `{xx}`
-👥 Groups : `{x}`
-🚧 Total users & groups : `{tot}` """)
+async def db_stats(_, m: Message):
+    u = all_users()
+    g = all_groups()
+    await m.reply_text(
+        f"**🍀 Chat Stats 🍀**\n"
+        f"🙋 Users : `{u}`\n"
+        f"👥 Groups : `{g}`\n"
+        f"🚧 Total : `{u + g}`"
+    )
 
-#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Broadcast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+# ── /bcast (sudo only) ────────────────────────────────────────────────────────
 @app.on_message(filters.command("bcast") & filters.user(cfg.SUDO))
-async def bcast(_, m : Message):
-    allusers = users
-    lel = await m.reply_text("`⚡️ Processing...`")
-    success = 0
-    failed = 0
-    deactivated = 0
-    blocked = 0
-    for usrs in allusers.find():
-        try:
-            userid = usrs["user_id"]
-            #print(int(userid))
-            if m.command[0] == "bcast":
-                await m.reply_to_message.copy(int(userid))
-            success +=1
-        except FloodWait as ex:
-            await asyncio.sleep(ex.value)
-            if m.command[0] == "bcast":
-                await m.reply_to_message.copy(int(userid))
-        except errors.InputUserDeactivated:
-            deactivated +=1
-            remove_user(userid)
-        except errors.UserIsBlocked:
-            blocked +=1
-        except Exception as e:
-            print(e)
-            failed +=1
+async def bcast(_, m: Message):
+    if not m.reply_to_message:
+        await m.reply("**Reply to a message to broadcast it.**")
+        return
 
-    await lel.edit(f"✅Successfull to `{success}` users.\n❌ Faild to `{failed}` users.\n👾 Found `{blocked}` Blocked users \n👻 Found `{deactivated}` Deactivated users.")
+    status = await m.reply_text("`⚡ Broadcasting…`")
+    s, f, d, b = await broadcast_message(m, forward=False)
+    await status.edit(
+        f"✅ Sent : `{s}`\n❌ Failed : `{f}`\n"
+        f"👾 Blocked : `{b}`\n👻 Deactivated : `{d}`"
+    )
 
-#━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Broadcast Forward ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+# ── /fcast (sudo only) ────────────────────────────────────────────────────────
 @app.on_message(filters.command("fcast") & filters.user(cfg.SUDO))
-async def fcast(_, m : Message):
-    allusers = users
-    lel = await m.reply_text("`⚡️ Processing...`")
-    success = 0
-    failed = 0
-    deactivated = 0
-    blocked = 0
-    for usrs in allusers.find():
-        try:
-            userid = usrs["user_id"]
-            #print(int(userid))
-            if m.command[0] == "fcast":
-                await m.reply_to_message.forward(int(userid))
-            success +=1
-        except FloodWait as ex:
-            await asyncio.sleep(ex.value)
-            if m.command[0] == "fcast":
-                await m.reply_to_message.forward(int(userid))
-        except errors.InputUserDeactivated:
-            deactivated +=1
-            remove_user(userid)
-        except errors.UserIsBlocked:
-            blocked +=1
-        except Exception as e:
-            print(e)
-            failed +=1
+async def fcast(_, m: Message):
+    if not m.reply_to_message:
+        await m.reply("**Reply to a message to forward it.**")
+        return
 
-    await lel.edit(f"✅Successfull to `{success}` users.\n❌ Faild to `{failed}` users.\n👾 Found `{blocked}` Blocked users \n👻 Found `{deactivated}` Deactivated users.")
+    status = await m.reply_text("`⚡ Forwarding…`")
+    s, f, d, b = await broadcast_message(m, forward=True)
+    await status.edit(
+        f"✅ Sent : `{s}`\n❌ Failed : `{f}`\n"
+        f"👾 Blocked : `{b}`\n👻 Deactivated : `{d}`"
+    )
 
-print("I'm Alive Now!")
-app.run()
+
+# ── Entry point ───────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    log.info("Bot is starting…")
+    app.run()
