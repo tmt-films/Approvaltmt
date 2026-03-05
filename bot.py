@@ -34,7 +34,7 @@ app = Client(
 MAIN_KEYBOARD = InlineKeyboardMarkup(
     [[
         InlineKeyboardButton("🗯 കേരളദേശം", url="https://t.me/Keraladhesham"),
-        InlineKeyboardButton("💬 Support", url="https://t.me/vj_bot_disscussion"),
+        InlineKeyboardButton("💬 𝐏𝐑𝐈𝐌𝐄𝐓𝐆 𝐁𝐎𝐓𝐒", url="https://t.me/PrimeTgBots"),
     ]]
 )
 
@@ -42,7 +42,7 @@ START_CAPTION = (
     "**🦊 Hello {mention}!\n"
     "I'm an auto approve [Admin Join Requests](https://t.me/telegram/153) Bot.\n"
     "I can approve users in Groups/Channels. Add me to your chat and promote me to admin "
-    "with add members permission.\n\n__Powered By : @Keraladhesham __**"
+    "with add members permission.\n\n__Powered By : @PrimeTgBots __**"
 )
 
 START_PHOTO = "https://files.catbox.moe/u5gz71.jpg"
